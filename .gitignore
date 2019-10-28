@@ -3,3 +3,12 @@ packer_cache/
 
 # For built boxes
 *.box
+
+# Ephemeral keys
+*.pem
+
+# Output folders
+output*/
+
+# JSON templates
+*.json

@@ -1,0 +1,38 @@
+variables: {}
+
+builders:
+  - &builder-definition
+    type: virtualbox-iso
+    name: "vbox-vagrant-builder"
+
+    iso_urls:
+      - cd66.iso
+      - https://cdn.openbsd.org/pub/OpenBSD/snapshots/amd64/cd66.iso
+    iso_checksum_type: sha256
+    iso_checksum: 9631b226b7f717182cef806b052dcacc7d9643ce1f975681389348317a9b91db
+
+    vm_name: "openbsd66.x86-64"
+    disk_size: 4096
+    memory: 512
+    cpus: 1
+    guest_os_type: "OpenBSD_64"
+    headless: true
+    guest_additions_mode: disable
+    virtualbox_version_file: '' # Do not upload version file
+
+    http_directory: "http"
+
+    boot_wait: 20s
+    boot_command:
+      - S<enter><wait>
+      - dhclient em0<enter><wait><wait><wait>
+      - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.conf<enter><wait>
+      - sed -i 's|<<ROOT_PUBKEY>>|{{ .SSHPublicKey }}|' /install.conf<enter><wait>
+      - install -a -f /install.conf && reboot<enter>
+    ssh_wait_timeout: 10000s  # Wait for the install to complete
+    ssh_username: root
+    shutdown_command: 'shutdown -p now'
+
+provisioners: []
+
+post-processors: []

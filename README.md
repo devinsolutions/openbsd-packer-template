@@ -16,5 +16,5 @@ Make sure that you have Packer and Pipenv installed, then:
 
 ```sh
 pipenv sync
-pipenv run yacker build openbsd66.yaml
+pipenv run yacker build openbsd.yaml
 ```
