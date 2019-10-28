@@ -3,7 +3,7 @@ variables: {}
 builders:
   - &builder-definition
     type: virtualbox-iso
-    name: "vbox-vagrant-builder"
+    name: vbox-gce-builder
 
     iso_urls:
       - cd66.iso
@@ -29,10 +29,16 @@ builders:
       - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.conf<enter><wait>
       - sed -i 's|<<ROOT_PUBKEY>>|{{ .SSHPublicKey }}|' /install.conf<enter><wait>
       - install -a -f /install.conf && reboot<enter>
-    ssh_wait_timeout: 10000s  # Wait for the install to complete
+    ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
     ssh_username: root
-    shutdown_command: 'shutdown -p now'
+    # This is a build of GCE image, which installs and enables google_compute_engine daemon.
+    # However, shutdown script of this daemon, if ran outside of GCE network, will cause shutdown
+    # process to freeze. That's why we skip running shutdown scripts this time.
+    shutdown_command: 'halt -p'
 
-provisioners: []
+provisioners:
+  - type: shell
+    script: scripts/prep-gce.sh
+    only: ['vbox-gce-builder']
 
 post-processors: []
