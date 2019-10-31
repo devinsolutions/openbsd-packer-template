@@ -11,7 +11,7 @@ builders:
     iso_checksum_type: sha256
     iso_checksum: 9631b226b7f717182cef806b052dcacc7d9643ce1f975681389348317a9b91db
 
-    vm_name: "openbsd66.x86-64"
+    vm_name: "openbsd66-gce.x86-64"
     disk_size: 4096
     memory: 512
     cpus: 1
@@ -31,9 +31,6 @@ builders:
       - install -a -f /install.conf && reboot<enter>
     ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
     ssh_username: root
-    # This is a build of GCE image, which installs and enables google_compute_engine daemon.
-    # However, shutdown script of this daemon, if ran outside of GCE network, will cause shutdown
-    # process to freeze. That's why we skip running shutdown scripts this time.
     shutdown_command: 'halt -p'
 
 provisioners:
@@ -41,4 +38,46 @@ provisioners:
     script: scripts/prep-gce.sh
     only: ['vbox-gce-builder']
 
-post-processors: []
+post-processors:
+  # The following list of post-processors will apply to `vbox-gce-builder`, and will prepare and
+  # upload the image to GCE.
+  # `googlecompute-import` post-processor needs `.tar.gz`-ipped raw disk image. We need to convert
+  # VMDK used by VirtualBox to raw image. We will use `shell-local` post-processor for that. Since
+  # it can't get a list of input artifacts, nor pass list of output artifacts to later
+  # post-processors we use `manifest` and `artifice` post-processors for that task.
+  # Finally we compress the image (we must use `compress` post-processor due to hardcoded check in
+  # `googlecompute-import`) and import it to GCE.
+  -
+    - type: manifest
+      strip_path: true
+      output: output/manifest.json
+      only:
+        - vbox-gce-builder
+    - type: shell-local
+      inline:
+        - jq -r '.builds[] | (.name + "/" + .files[].name)' output/manifest.json |
+            grep '\.vmdk$' > output/disk-path
+        # We can create image only from a single disk
+        - if [[ $(cat output/disk-path | wc -l) > 1 ]]; then exit 1; fi
+        - qemu-img convert -f vmdk -O raw output-`cat output/disk-path` output/disk.raw
+        - rm output/manifest.json output/disk-path
+      only:
+        - vbox-gce-builder
+    - type: artifice
+      files:
+        - output/disk.raw
+      only:
+        - vbox-gce-builder
+    - type: compress
+      output: "output/disk.tar.gz"
+      only:
+        - vbox-gce-builder
+    - type: googlecompute-import
+      only:
+        - vbox-gce-builder
+      account_file: '{{ user `gcp_account_file` }}'
+      bucket: '{{ user `gcp_bucket` }}'
+      image_name: openbsd-66-minimal
+      project_id: '{{ user `gcp_project_id` }}'
+      image_description: Minimal OpenBSD 6.6 image
+      image_family: openbsd

@@ -12,3 +12,6 @@ output*/
 
 # JSON templates
 *.json
+
+# Variables
+vars.yaml

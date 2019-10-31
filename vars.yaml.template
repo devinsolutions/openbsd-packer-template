@@ -1,0 +1,4 @@
+# Vars for GCE
+gcp_account_file: ''
+gcp_bucket: ''
+gcp_project_id: ''
