@@ -33,6 +33,7 @@ builders:
       - install -a -f /install.conf && reboot<enter>
     ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
     ssh_username: root
+    pause_before_connecting: 10s  # Let's give rc.firsttime a chance to finish.
     shutdown_command: 'halt -p'
 
   - <<: *builder-definition
