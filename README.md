@@ -30,7 +30,8 @@ DRY). We use [yacker](https://yacker.readthedocs.io/en/latest/) to invoke Packer
     flag. See the following sections for prerequisites specific for each builder.
   - Copy `vars.yaml.template` to `vars.yaml` and fill in sections you are interested in.
   - `$ mkdir -p output`
-  - `$ pipenv run yacker build -var-file=vars.yaml [-only=vbox-gce-builder] openbsd.yaml`
+  - `$ pipenv run yacker build -var-file=vars.yaml [-only=vbox-gce-builder,vbox-vagrant-builder]
+     openbsd.yaml`
 
 During build, you may see several errors like `==> vbox-gce-builder: ksh: sudo: not found`. These
 are expected and it is safe to ignore them.
@@ -42,3 +43,11 @@ Read and understand how does
 post-processor work. Fill-in required info to `vars.yaml`. The resulting image will be named
 `openbsd-66-minimal`, make sure that image with this name **does not** exist in the target project,
 otherwise the import will fail.
+
+### Building and uploading Vagrant image (`vbox-vagrant-builder`)
+
+If you just want to build a Vagrant box locally and not upload it to Vagrant Cloud, comment-out the
+`vagrant-cloud` post-processor in `openbsd.yaml`. Otherwise fill-in required variables in
+`vars.yaml`, and make sure that box named as specified in variable `image_name` exists in the
+Vagrant Cloud target organization, otherwise the import will fail. The import will also fail if
+virtualbox provider already exists for version `vagrant_box_version`.

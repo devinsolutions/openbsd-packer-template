@@ -1,4 +1,6 @@
-variables: {}
+variables:
+  vagrant_box_version: 0.0.1
+  image_name: 'openbsd-66-minimal'
 
 builders:
   - &builder-definition
@@ -33,10 +35,19 @@ builders:
     ssh_username: root
     shutdown_command: 'halt -p'
 
+  - <<: *builder-definition
+    name: vbox-vagrant-builder
+    vm_name: "centos66.x86-64"
+    # As suggested in https://www.vagrantup.com/docs/boxes/base.html#disk-space
+    disk_size: 65536
+
 provisioners:
   - type: shell
     script: scripts/prep-gce.sh
     only: ['vbox-gce-builder']
+  - type: shell
+    script: scripts/prep-vagrant.sh
+    only: ['vbox-vagrant-builder']
 
 post-processors:
   # The following list of post-processors will apply to `vbox-gce-builder`, and will prepare and
@@ -77,7 +88,19 @@ post-processors:
         - vbox-gce-builder
       account_file: '{{ user `gcp_account_file` }}'
       bucket: '{{ user `gcp_bucket` }}'
-      image_name: openbsd-66-minimal
+      image_name: "{{ user `image_name` }}"
       project_id: '{{ user `gcp_project_id` }}'
       image_description: Minimal OpenBSD 6.6 image
       image_family: openbsd
+
+  # Create Vagrant box and upload it to Vagrant Cloud
+  -
+    - type: vagrant
+      output: "output/{{.Provider}}-{{ user `image_name` }}.box"
+      only:
+        - vbox-vagrant-builder
+    - type: vagrant-cloud
+      access_token: "{{ user `vagrant_access_token` }}"
+      box_tag: "{{ user `vagrant_organization` }}/{{ user `image_name` }}"
+      version: "{{ user `vagrant_box_version` }}"
+      no_release: true

@@ -2,3 +2,7 @@
 gcp_account_file: ''
 gcp_bucket: ''
 gcp_project_id: ''
+
+# Vars for Vagrant
+vagrant_organization: ''
+vagrant_access_token: ''
