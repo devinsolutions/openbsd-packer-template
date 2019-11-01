@@ -22,15 +22,15 @@ builders:
     guest_additions_mode: disable
     virtualbox_version_file: '' # Do not upload version file
 
-    http_directory: "http"
+    http_directory: "config"
 
     boot_wait: 20s
     boot_command:
       - S<enter><wait>
       - dhclient em0<enter><wait><wait><wait>
-      - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/install.conf<enter><wait>
+      - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/openbsd-install.conf<enter><wait>
       - sed -i 's|<<ROOT_PUBKEY>>|{{ .SSHPublicKey }}|' /install.conf<enter><wait>
-      - install -a -f /install.conf && reboot<enter>
+      - install -a -f /openbsd-install.conf && reboot<enter>
     ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
     ssh_username: root
     shutdown_command: 'halt -p'
