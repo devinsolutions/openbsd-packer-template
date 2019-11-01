@@ -62,45 +62,40 @@ post-processors:
     - type: manifest
       strip_path: true
       output: output/manifest.json
-      only:
-        - vbox-gce-builder
+      only: ['vbox-gce-builder']
     - type: shell-local
       inline:
         - jq -r '.builds[] | (.name + "/" + .files[].name)' output/manifest.json |
             grep '\.vmdk$' > output/disk-path
         # We can create image only from a single disk
-        - if [[ $(cat output/disk-path | wc -l) > 1 ]]; then exit 1; fi
-        - qemu-img convert -f vmdk -O raw output-`cat output/disk-path` output/disk.raw
+        - if [ $(wc -l < output/disk-path) -gt 1 ]; then exit 1; fi
+        - qemu-img convert -f vmdk -O raw "output-$(cat output/disk-path)" output/disk.raw
         - rm output/manifest.json output/disk-path
-      only:
-        - vbox-gce-builder
+      only: ['vbox-gce-builder']
     - type: artifice
       files:
         - output/disk.raw
-      only:
-        - vbox-gce-builder
+      only: ['vbox-gce-builder']
     - type: compress
       output: "output/disk.tar.gz"
-      only:
-        - vbox-gce-builder
+      only: ['vbox-gce-builder']
     - type: googlecompute-import
-      only:
-        - vbox-gce-builder
       account_file: '{{ user `gcp_account_file` }}'
       bucket: '{{ user `gcp_bucket` }}'
       image_name: "{{ user `image_name` }}"
       project_id: '{{ user `gcp_project_id` }}'
       image_description: Minimal OpenBSD 6.6 image
       image_family: openbsd
+      only: ['vbox-gce-builder']
 
   # Create Vagrant box and upload it to Vagrant Cloud
   -
     - type: vagrant
       output: "output/{{.Provider}}-{{ user `image_name` }}.box"
-      only:
-        - vbox-vagrant-builder
+      only: ['vbox-vagrant-builder']
     - type: vagrant-cloud
       access_token: "{{ user `vagrant_access_token` }}"
       box_tag: "{{ user `vagrant_organization` }}/{{ user `image_name` }}"
       version: "{{ user `vagrant_box_version` }}"
       no_release: true
+      only: ['vbox-vagrant-builder']
