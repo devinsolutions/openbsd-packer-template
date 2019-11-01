@@ -9,9 +9,9 @@ builders:
 
     iso_urls:
       - cd66.iso
-      - https://cdn.openbsd.org/pub/OpenBSD/snapshots/amd64/cd66.iso
+      - https://cdn.openbsd.org/pub/OpenBSD/6.6/amd64/cd66.iso
     iso_checksum_type: sha256
-    iso_checksum: 9631b226b7f717182cef806b052dcacc7d9643ce1f975681389348317a9b91db
+    iso_checksum: c2d4d567657b3160b549ebc08561e3c8a2e8130cdd8d4676476861d5e063ea7a
 
     vm_name: "openbsd66-gce.x86-64"
     disk_size: 4096
@@ -30,7 +30,7 @@ builders:
       - dhclient em0<enter><wait><wait><wait>
       - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/openbsd-install.conf<enter><wait>
       - sed -i 's|<<ROOT_PUBKEY>>|{{ .SSHPublicKey }}|' /install.conf<enter><wait>
-      - install -a -f /openbsd-install.conf && reboot<enter>
+      - install -a -f /install.conf && reboot<enter>
     ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
     ssh_username: root
     shutdown_command: 'halt -p'
@@ -92,6 +92,7 @@ post-processors:
   -
     - type: vagrant
       output: "output/{{.Provider}}-{{ user `image_name` }}.box"
+      vagrantfile_template: config/vagrantfile-template-openbsd.rb
       only: ['vbox-vagrant-builder']
     - type: vagrant-cloud
       access_token: "{{ user `vagrant_access_token` }}"
