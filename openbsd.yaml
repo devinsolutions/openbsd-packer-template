@@ -1,6 +1,6 @@
 variables:
-  vagrant_box_version: 0.0.1
-  image_name: 'openbsd-66-minimal'
+  vagrant_box_version: 1.0.0
+  image_name: 'openbsd-66-basic'
 
 builders:
   - &builder-definition

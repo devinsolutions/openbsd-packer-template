@@ -2,11 +2,13 @@
 
 ## Goal
 
-Goal of this project is to provide, minimal OpenBSD Vagrnat and GCP images, primarily for testing
+Goal of this project is to provide a small OpenBSD Vagrant and GCP images, primarily for testing
 Ansible roles.
 
-By "minimal" we mean that only `bsd`, `bsd.rd` and `base` sets are included (plus GCE daemons and
-Python needed by them for GCE images). We support only latest stable OpenBSD release. No binary
+Vagrant Box is available here: https://app.vagrantup.com/devinsolutions/boxes/openbsd-66-basic
+
+By "basic" we mean that only `bsd`, `bsd.rd`, `base` and `comp` sets are included (plus GCE daemons
+and Python needed by them in GCE images). We support only latest stable OpenBSD release. No binary
 patches are included.
 
 ## YAML
