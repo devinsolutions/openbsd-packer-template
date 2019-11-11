@@ -8,8 +8,8 @@ Ansible roles.
 Vagrant Box is available here: https://app.vagrantup.com/devinsolutions/boxes/openbsd-66-basic
 
 By "basic" we mean that only `bsd`, `bsd.rd`, `base` and `comp` sets are included (plus GCE daemons
-and Python needed by them in GCE images). We support only latest stable OpenBSD release. No binary
-patches are included.
+and Python needed by them in GCE images). We support only latest stable OpenBSD release. We update
+these images with the latest binary patches on a best-effort basis.
 
 ## YAML
 
