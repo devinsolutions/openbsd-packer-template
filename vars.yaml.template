@@ -1,8 +1,10 @@
-# Vars for GCE
+## Vars for GCE
 gcp_account_file: ''
 gcp_bucket: ''
 gcp_project_id: ''
 
-# Vars for Vagrant
+## Vars for Vagrant
 vagrant_organization: ''
 vagrant_access_token: ''
+# The version will be uploaded, but won't be published. Note: the value must be a string.
+dont_release_vagrant_box_version: 'true'

@@ -118,5 +118,5 @@ post-processors:
       box_tag: '{{ user `vagrant_organization` }}/{{ user `image_name` }}'
       version: '{{ user `image_version_vagrant_box` }}'
       version_description: '{{ user `image_version_description` }}'
-      no_release: true
+      no_release: '{{ user `dont_release_vagrant_box_version` }}'
       only: ['vbox-vagrant-builder']
