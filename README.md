@@ -31,9 +31,8 @@ DRY). We use [yacker](https://yacker.readthedocs.io/en/latest/) to invoke Packer
   - Decide whether you want to build GCE image of Vagrant Box. You can specify them using `-only`
     flag. See the following sections for prerequisites specific for each builder.
   - Copy `vars.yaml.template` to `vars.yaml` and fill in sections you are interested in.
-  - `$ mkdir -p output`
-  - `$ pipenv run yacker build -var-file=vars.yaml [-only=vbox-gce-builder,vbox-vagrant-builder]
-     openbsd.yaml`
+  - `$ pipenv run build [-only=vbox-gce-builder,vbox-vagrant-builder]`
+  - When done, you can remove build artifacts and caches using `$ pipenv run clean`
 
 During build, you may see several errors like `==> vbox-gce-builder: ksh: sudo: not found`. These
 are expected and it is safe to ignore them.
