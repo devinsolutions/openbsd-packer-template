@@ -1,0 +1,13 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+matildapeak-yacker = "*"
+
+[scripts]
+# In Packer invocation, the template file must go after options, but we want to specify options
+# as part of `pipenv run build [...]` command.
+build = "sh -c 'mkdir -p output && yacker build -var-file=vars.yaml $@ openbsd.yaml' yacker"
+clean = "sh -c 'rm -rv output* packer_cache*'"

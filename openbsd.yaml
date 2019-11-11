@@ -1,0 +1,122 @@
+variables:
+  openbsd_desired_syspatches: 001_bpf 002_ber 003_bgpd
+  image_name: openbsd-66-basic
+  image_version_major: '1'
+  image_version_minor: '0'
+  image_version_patch: '0'
+  image_version_description: |
+    OpenBSD 6.6 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
+    following binary patches included: {{ user `openbsd_desired_syspatches` }}.
+  # According to https://www.vagrantup.com/docs/boxes/versioning.html, "Vagrant boxes must be of the
+  # format X.Y.Z where X, Y, and Z are all positive integers."
+  image_version_vagrant_box: "{{ user `image_version_major` }}.{{ user `image_version_minor` }}.\
+                              {{ user `image_version_patch` }}"
+  # According to https://cloud.google.com/compute/docs/reference/rest/v1/images#Image.FIELDS.name,
+  # image name can't contain docs, so we delimit the version with dashes instead
+  image_version_gce_image: "{{ user `image_version_major` }}-{{ user `image_version_minor` }}-\
+                            {{ user `image_version_patch` }}"
+
+builders:
+  - &builder-definition
+    type: virtualbox-iso
+    name: vbox-gce-builder
+
+    iso_urls:
+      - cd66.iso
+      - https://cdn.openbsd.org/pub/OpenBSD/6.6/amd64/cd66.iso
+    iso_checksum_type: sha256
+    iso_checksum: c2d4d567657b3160b549ebc08561e3c8a2e8130cdd8d4676476861d5e063ea7a
+
+    vm_name: openbsd66-gce.x86-64
+    disk_size: 4096
+    memory: 512
+    cpus: 1
+    guest_os_type: OpenBSD_64
+    headless: true
+    guest_additions_mode: disable
+    virtualbox_version_file: '' # Do not upload version file
+
+    http_directory: config
+
+    boot_wait: 20s
+    boot_command:
+      - S<enter><wait>
+      - dhclient em0<enter><wait><wait><wait>
+      - ftp -o install.conf http://{{ .HTTPIP }}:{{ .HTTPPort }}/openbsd-install.conf<enter><wait>
+      - sed -i 's|<<ROOT_PUBKEY>>|{{ .SSHPublicKey }}|' /install.conf<enter><wait>
+      - install -a -f /install.conf && reboot<enter>
+    ssh_wait_timeout: 10000s  # Installation may take some time, let's make sure we won't timeout.
+    ssh_username: root
+    pause_before_connecting: 10s  # Let's give rc.firsttime a chance to finish.
+    shutdown_command: halt -p
+
+  - <<: *builder-definition
+    name: vbox-vagrant-builder
+    vm_name: centos66.x86-64
+    # As suggested in https://www.vagrantup.com/docs/boxes/base.html#disk-space
+    disk_size: 65536
+
+provisioners:
+  - type: shell
+    script: scripts/install-patches.sh
+    environment_vars:
+      - DESIRED_SYSPATCH_SET={{ user `openbsd_desired_syspatches` }}
+  - type: shell
+    script: scripts/prep-gce.sh
+    only: ['vbox-gce-builder']
+  - type: shell
+    script: scripts/prep-vagrant.sh
+    only: ['vbox-vagrant-builder']
+
+post-processors:
+  # The following list of post-processors will apply to `vbox-gce-builder`, and will prepare and
+  # upload the image to GCE.
+  # `googlecompute-import` post-processor needs `.tar.gz`-ipped raw disk image. We need to convert
+  # VMDK used by VirtualBox to raw image. We will use `shell-local` post-processor for that. Since
+  # it can't get a list of input artifacts, nor pass list of output artifacts to later
+  # post-processors we use `manifest` and `artifice` post-processors for that task.
+  # Finally we compress the image (we must use `compress` post-processor due to hardcoded check in
+  # `googlecompute-import`) and import it to GCE.
+  -
+    - type: manifest
+      strip_path: true
+      output: output/manifest.json
+      only: ['vbox-gce-builder']
+    - type: shell-local
+      inline:
+        - jq -r '.builds[] | (.name + "/" + .files[].name)' output/manifest.json |
+            grep '\.vmdk$' > output/disk-path
+        # We can create image only from a single disk
+        - if [ $(wc -l < output/disk-path) -gt 1 ]; then exit 1; fi
+        - qemu-img convert -f vmdk -O raw "output-$(cat output/disk-path)" output/disk.raw
+        - rm output/manifest.json output/disk-path
+      only: ['vbox-gce-builder']
+    - type: artifice
+      files:
+        - output/disk.raw
+      only: ['vbox-gce-builder']
+    - type: compress
+      output: output/disk.tar.gz
+      only: ['vbox-gce-builder']
+    - type: googlecompute-import
+      account_file: '{{ user `gcp_account_file` }}'
+      bucket: '{{ user `gcp_bucket` }}'
+      image_name: '{{ user `image_name` }}-v{{ user `image_version_gce_image` }}'
+      project_id: '{{ user `gcp_project_id` }}'
+      image_description: '{{ user `image_version_description` }}'
+      image_family: '{{ user `image_name` }}'
+      only: ['vbox-gce-builder']
+
+  # Create Vagrant box and upload it to Vagrant Cloud
+  -
+    - type: vagrant
+      output: output/{{.Provider}}-{{ user `image_name` }}.box
+      vagrantfile_template: config/vagrantfile-template-openbsd.rb
+      only: ['vbox-vagrant-builder']
+    - type: vagrant-cloud
+      access_token: '{{ user `vagrant_access_token` }}'
+      box_tag: '{{ user `vagrant_organization` }}/{{ user `image_name` }}'
+      version: '{{ user `image_version_vagrant_box` }}'
+      version_description: '{{ user `image_version_description` }}'
+      no_release: '{{ user `dont_release_vagrant_box_version` }}'
+      only: ['vbox-vagrant-builder']
