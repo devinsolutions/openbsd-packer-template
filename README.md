@@ -52,3 +52,10 @@ If you just want to build a Vagrant box locally and not upload it to Vagrant Clo
 `vars.yaml`, and make sure that box named as specified in variable `image_name` exists in the
 Vagrant Cloud target organization, otherwise the import will fail. The import will also fail if
 virtualbox provider already exists for version `vagrant_box_version`.
+
+## Updating (new binary patches)
+
+  - Add name of the new binary patch to `openbsd.yaml` variable `openbsd_desired_syspatches`
+    (space-separated from the rest).
+  - Bump image version (`image_version_patch`).
+  - Build and publish, commit and push.
