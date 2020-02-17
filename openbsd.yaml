@@ -2,12 +2,13 @@ variables:
   openbsd_desired_syspatches: >
     001_bpf 002_ber 003_bgpd 004_net80211 005_sysupgrade 006_ifioctl 007_inteldrm 010_libcauth
     012_suauth 013_ldso 015_ftp 016_ripd 017_inteldrmctx 018_smtpd_tls 019_smtpd_exec
+    020_vmm_pvclock
   # Skipped 008_mesa, 009_mesaxlock and 011_xenodm since we don't have x* sets installed
   # Skipped 014_eret since we don't build ARM images.
   image_name: openbsd-66-basic
   image_version_major: '1'
   image_version_minor: '0'
-  image_version_patch: '6'
+  image_version_patch: '7'
   image_version_description: |
     OpenBSD 6.6 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
     following binary patches included: {{ user `openbsd_desired_syspatches` }}.
