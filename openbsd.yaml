@@ -53,7 +53,7 @@ builders:
 
   - <<: *builder-definition
     name: vbox-vagrant-builder
-    vm_name: centos67.x86-64
+    vm_name: openbsd67.x86-64
     # As suggested in https://www.vagrantup.com/docs/boxes/base.html#disk-space
     disk_size: 65536
 
