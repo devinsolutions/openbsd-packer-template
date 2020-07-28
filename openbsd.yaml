@@ -1,11 +1,11 @@
 variables:
   openbsd_desired_syspatches: >
     001_wscons 002_rpki 003_ssh 004_libssl 005_unbound 006_smtpd_sockaddr 007_perl 008_hid 009_asr
-    010_x509 011_shmget 012_tty
+    010_x509 011_shmget 012_tty 013_tty 014_iked 015_rpki
   image_name: openbsd-67-basic
   image_version_major: '1'
   image_version_minor: '0'
-  image_version_patch: '2'
+  image_version_patch: '3'
   image_version_description: |
     OpenBSD 6.7 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
     following binary patches included: {{ user `openbsd_desired_syspatches` }}.
