@@ -1,9 +1,10 @@
 variables:
-  openbsd_desired_syspatches: ""
+  openbsd_desired_syspatches: >
+    001_bgpd 002_icmp6 003_tmux
   image_name: openbsd-68-basic
   image_version_major: '1'
   image_version_minor: '0'
-  image_version_patch: '0'
+  image_version_patch: '1'
   image_version_description: |
     OpenBSD 6.8 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
     following binary patches included: {{ user `openbsd_desired_syspatches` }}.
