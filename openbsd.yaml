@@ -1,12 +1,12 @@
 variables:
   openbsd_desired_syspatches: >
-    001_bgpd 002_icmp6 003_tmux
-  image_name: openbsd-68-basic
+    001_vmd
+  image_name: openbsd-69-basic
   image_version_major: '1'
   image_version_minor: '0'
-  image_version_patch: '1'
+  image_version_patch: '0'
   image_version_description: |
-    OpenBSD 6.8 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
+    OpenBSD 6.9 image with "bsd", "bsd.rd", "base" and "comp" sets installed. This version has the
     following binary patches included: {{ user `openbsd_desired_syspatches` }}.
   # According to https://www.vagrantup.com/docs/boxes/versioning.html, "Vagrant boxes must be of the
   # format X.Y.Z where X, Y, and Z are all positive integers."
@@ -23,11 +23,11 @@ builders:
     name: vbox-gce-builder
 
     iso_urls:
-      - cd68.iso
-      - https://cdn.openbsd.org/pub/OpenBSD/6.8/amd64/cd68.iso
-    iso_checksum: sha256:05fb374fa25461d2315349214228ee671d8bae45f16da994283a8cf9c848451c
+      - cd69.iso
+      - https://cdn.openbsd.org/pub/OpenBSD/6.9/amd64/cd69.iso
+    iso_checksum: sha256:b391350d72a4fcab550033c830a17612cff65ebdb6de428732d9b15f780bf9c2
 
-    vm_name: openbsd68-gce.x86-64
+    vm_name: openbsd69-gce.x86-64
     disk_size: 4096
     memory: 512
     cpus: 1
@@ -52,7 +52,7 @@ builders:
 
   - <<: *builder-definition
     name: vbox-vagrant-builder
-    vm_name: openbsd68.x86-64
+    vm_name: openbsd69.x86-64
     # As suggested in https://www.vagrantup.com/docs/boxes/base.html#disk-space
     disk_size: 65536
 

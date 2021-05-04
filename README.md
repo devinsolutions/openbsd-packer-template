@@ -5,7 +5,7 @@
 Goal of this project is to provide compact OpenBSD Vagrant and GCE images, primarily for testing
 Ansible roles.
 
-Vagrant Box is available here: https://app.vagrantup.com/devinsolutions/boxes/openbsd-68-basic
+Vagrant Box is available here: https://app.vagrantup.com/devinsolutions/boxes/openbsd-69-basic
 
 By "basic" we mean that only `bsd`, `bsd.rd`, `base` and `comp` sets are included (plus GCE daemons
 and Python needed by them in GCE images). We support only latest stable OpenBSD release. We update
@@ -27,7 +27,7 @@ DRY). We use [yacker](https://yacker.readthedocs.io/en/latest/) to invoke Packer
 
 ## Building
 
-  - Install Python dependencies (`$ pipenv sync`).
+  - Install Python dependencies (`$ pipenv sync --dev`).
   - Decide whether you want to build GCE image or Vagrant Box. You can specify them using `-only`
     flag. See the following sections for prerequisites specific for each builder.
   - Copy `vars.yaml.template` to `vars.yaml` and fill in sections you are interested in.
@@ -42,7 +42,7 @@ are expected and it is safe to ignore them.
 Read and understand how does
 [`googlecompute-import`](https://www.packer.io/docs/post-processors/googlecompute-import.html)
 post-processor work. Fill-in required info to `vars.yaml`. The resulting image will be named
-`openbsd-68-basic`, make sure that image with this name **does not** exist in the target project,
+`openbsd-69-basic`, make sure that image with this name **does not** exist in the target project,
 otherwise the import will fail.
 
 ### Building and uploading Vagrant image (`vbox-vagrant-builder`)
