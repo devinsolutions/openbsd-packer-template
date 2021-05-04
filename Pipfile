@@ -3,8 +3,17 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-[packages]
+# Package `matildapeak-yacker` depends older release of `pyyaml`. I can't get it to install with
+# Python 3.9. I've tested it with the newest `pyyaml` version, and it works fine. So I applied
+# workaround as described here:
+# https://github.com/pypa/pipenv/issues/1921#issuecomment-379131833
+# to "override" the pinned dependency version.
+
+[dev-packages]
 matildapeak-yacker = "*"
+
+[packages]
+pyyaml = "*"
 
 [scripts]
 # In Packer invocation, the template file must go after options, but we want to specify options
